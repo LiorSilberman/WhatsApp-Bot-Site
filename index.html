@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WhatsApp Web App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.9.0/brython.js"></script>
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid" style="background-color:#333">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" style="color: aliceblue" href="#">Whatsapp Bot</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
+                {% if not session['username'] %}
+                <ul class="nav navbar-nav navbar-right">
+                    <li id="signup-link"><a style="color: aliceblue" href="/signup">Sign Up</a></li>
+                    <li id="login-link"><a style="color: aliceblue" href="/login">Login</a></li>
+                </ul>
+                {% else %}
+                <ul class="nav navbar-nav navbar-right">
+                    <li id="logout"><a style="color: aliceblue" href="/logout">Log Out</a></li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {% if session['username'] %}
+    <h1>Welcome, {{ session['username'] }}!</h1>
+    {% else %}
+    <h1>Welcome, guest!</h1><br>
+    
+
+    <!-- Join Our Business Community Section -->
+    <div class="appeal-section">
+        <h1 class="appeal-title">Join Our Business Community!</h1>
+        <p class="appeal-description">Supercharge your business communication with our revolutionary WhatsApp Bot. Unlike other expensive solutions that offer limited features, we pride ourselves on being the most cost-effective option in the market.</p>
+        <p class="appeal-description">With our affordable pricing plans, you get access to a comprehensive set of features that allow you to connect with your audience like never before. Send messages to multiple recipients simultaneously and make a lasting impact by including captivating images.</p>
+        <p class="appeal-description">Don't break the bank with overpriced alternatives that offer less. Sign up today and experience the perfect balance of affordability and functionality. Join our business community and take advantage of our budget-friendly WhatsApp Bot!</p>
+        <a class="signup-link" href="/signup">Sign Up Now</a>
+    </div>
+
+
+    <!-- What We Do Section -->
+    <div class="appeal-section">
+        <div class="what-we-do-section">
+            <h2>What We Do</h2>
+            <p>At our company, we are committed to revolutionizing business communication through our cutting-edge WhatsApp Bot. Our mission is to provide you with an affordable solution that doesn't compromise on functionality.</p>
+            <p>With our feature-rich platform, you can effortlessly send WhatsApp messages to your audience and amplify your reach. Stand out from the competition by including attention-grabbing images that enhance your communication and leave a lasting impression.</p>
+            <p>Say goodbye to exorbitant pricing and limited features. Join our business community and enjoy the benefits of our cost-effective solution that empowers you to connect with your customers in a meaningful way. Sign up now and unlock the full potential of WhatsApp messaging!</p>
+        </div>
+    </div>
+
+    {% endif %}
+
+    {% if session['username'] %}
+
+    <div class="description">
+        <p>Instructions:</p>
+        <ol>
+            <li>Click on the "Open WhatsApp" button to connect your WhatsApp account. You have 1 minute to complete the connection before the WhatsApp connection closes. If the connection closes, you will need to try again.</li>
+            <li>In the "Contact Names" textarea, add your list of contacts exactly as they are written in your WhatsApp contact list. Each name should be entered on a new line. For example:
+                <code><br>
+                Jane Boe<br>
+                Jane Smith<br>
+                Alice Johnson</code><br>
+                Make sure to follow this format to ensure the names are recognized correctly.
+            </li>
+            <li>Enter your desired message in the "Message" textarea. This is the message that you want to send to the contacts in your list. You can also add emojis to your message by clicking on the smiley emoji icon.</li>
+            <li>Once you have added the contact names and message, click on the "Send Message" button to initiate the message sending process. Sit back and watch the magic happen as your message gets sent to the specified contacts.</li>
+        </ol>
+    </div>
+
+    <div class="form-container">
+        <form action="/open-whatsapp" method="POST">
+            <button id="open-whatsapp-btn">Open WhatsApp</button>
+        </form>
+        
+        
+        <form action="/send-message" method="POST">
+            <!-- Send message form fields -->
+            <div class="form-field">
+                <label for="contact">Contact Names:</label>
+                <div class="emoji-container">
+                    <textarea id="contact" name="contact" placeholder="name1 &#10;name2&#10;name3&#10;..." style="width: 350px; height: 100px;"  required></textarea>
+                    <label class="emoji-button1">🙂</label>
+                </div>
+            </div>
+            <div class="form-field">
+                <label for="message">Message:</label>
+                <div class="emoji-container">
+                    <textarea id="message" name="message" rows="5" style="width: 350px; height: 100px;" required></textarea>
+                    <label class="emoji-button2">🙂</label>
+                </div>
+            </div>
+        
+    
+            {% if run %}
+            <input type="submit" value="Send Message">
+            {% else %}
+            <input type="submit" value="Send Message" disabled>
+            {% endif %}
+            
+
+            
+
+            {% else %}
+            <!-- TODO -->
+            {% endif %}
+    
+            {% for name in error %}
+            <p>{{name}} not found in your contacts.</p>
+            {% endfor %}
+        </form>
+    </div>
+    
+
+    <!-- Contact Us -->
+    <div class="appeal-section">
+        <div class="contact-us-section">
+            <h2>Contact Us</h2>
+            <p>Discover more about us! Share your details, and we'll reach out to you with all the exciting information.</p>
+            <form action="/contact-us" method="POST">
+                <label for="name">Name:</label><br>
+                <input type="text" id="name" name="name" required><br><br>
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email" required><br><br>
+                <label for="phone">Phone Number:</label><br>
+                <input type="text" id="phone" name="phone" required><br><br>
+                <label for="message">Comment:</label><br>
+                <textarea id="comment" name="comment" required></textarea><br><br>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <footer>&copy; 2023 Lior Silberman. All rights reserved.</footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="static/Emoji.js"></script>
+    <script>
+        $(document).ready(function() {
+           
+            // Trigger the WhatsApp automation on button click
+            $('#open-whatsapp-btn').click(function() {
+                openWhatsApp();
+            });
+
+            function openWhatsApp() {
+                // Retrieve the necessary data for the request
+                var targetUrl = 'https://web.whatsapp.com/';
+
+                // Make a POST request to the server
+                $.ajax({
+                    url: '/open-whatsapp',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ target_url: targetUrl }),
+                    success: function(response) {
+                        console.log(response.message);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('An error occurred:', error);
+                    }
+                });
+            }
+        
+            new EmojiPicker({
+                trigger: [
+                    {
+                        insertInto: ['#contact'],
+                        selector: '.emoji-button1'
+                    },
+                    {
+                        insertInto: ['#message'],
+                        selector: '.emoji-button2'
+                    }
+                ],
+            })
+
+            // Detect language and set directionality dynamically
+            $("#contact, #message").on("input", function() {
+                var text = $(this).val();
+                var lang = detectLanguage(text);
+                setDirectionality($(this), lang);
+            });
+
+            function detectLanguage(text) {
+                // Implement your language detection logic here
+                // You can use external libraries or APIs for more accurate language detection
+                // For simplicity, this example assumes English for text containing only ASCII characters
+                // and Hebrew for text containing any non-ASCII Hebrew characters
+                var regexHebrew = /[\u0590-\u05FF]/;
+                if (regexHebrew.test(text)) {
+                    return "hebrew";
+                } else {
+                    return "english";
+                }
+            }
+
+            function setDirectionality(element, lang) {
+                if (lang === "hebrew") {
+                    element.css("direction", "rtl");
+                    element.css("text-align", "right");
+                } else {
+                    element.css("direction", "ltr");
+                    element.css("text-align", "left");
+                }
+            }       
+        });
+    </script>
+</body>
+</html>
