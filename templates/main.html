@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WhatsApp Web App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid" style="background-color:#333">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" style="color: aliceblue" href="#">Whatsapp Bot</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
+                {% if not session['username'] %}
+                <ul class="nav navbar-nav navbar-right">
+                    <li id="signup-link"><a style="color: aliceblue" href="/signup">Sign Up</a></li>
+                    <li id="login-link"><a style="color: aliceblue" href="/login">Login</a></li>
+                </ul>
+                {% else %}
+                <ul class="nav navbar-nav navbar-right">
+                    <li id="logout"><a style="color: aliceblue" href="/logout">Log Out</a></li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {% if session['username'] %}
+    <h1>Welcome, {{ session['username'] }}!</h1>
+    {% else %}
+    <h1>Welcome, guest!</h1><br>
+    
+
+    <div class="appeal-section">
+        <h1 class="appeal-title">Join Our Business Community!</h1>
+        <p class="appeal-description">Supercharge your business communication with our WhatsApp Bot. Send messages to multiple people simultaneously, and even include images to make your messages more engaging and impactful. Sign up today and transform your messaging experience!</p>
+        <a class="signup-link" href="/signup">Sign Up Now</a>
+    </div>
+    {% endif %}
+
+    <form action="/open-whatsapp" method="POST">
+        <button >Click here Open WhatsApp</button>
+    </form>
+
+    
+    <form action="/send-message" method="POST">
+        {% if not session['username'] %}
+        <!-- Send message form fields -->
+        <label for="contact">Contact Name:</label>
+        <div class="emoji-container">
+            <input type="text" id="contact" name="contact" required>
+            <label id="contact" class="emoji-button1"> 🙂</label>
+        </div>
+        <br><br>
+        <label for="message">Message:</label>
+        <div class="emoji-container">
+            <textarea id="message" name="message" required></textarea>
+            <label id="message" class="emoji-button2"> 🙂</label>
+        </div>
+
+    {% else %}
+        <label for="contact">Contact Name:</label>
+        <div class="emoji-container">
+            <textarea id="contact" name="contact" required></textarea>
+            <label id="contact" class="emoji-button1"> 🙂</label>
+        </div>
+        <br><br>
+        <label for="message">Message:</label>
+        <div class="emoji-container">
+            <textarea id="message" name="message" required></textarea>
+            <label id="message" class="emoji-button2"> 🙂</label>
+        
+        {% if run %}
+        <input type="submit" value="Send Message">
+        {%else %}
+        <input type="submit" value="Send Message" disabled >
+        {% endif %}
+        {% endif %}
+        {% for name in error %}
+        <p>{{name}} not found in your contacts. </p>
+        {% endfor %} 
+    </form><br>
+
+    {% if not session['username'] %}
+    <p class="demo-version-info">Please note that this is a demo version of the WhatsApp Web App. In the demo version, you can send only one message without including any images. To access the full version with unlimited messaging, the ability to send messages to multiple people, and image inclusion, we encourage you to sign up.</p>
+    {% endif %}
+    <footer>&copy; 2023 Lior Silberman. All rights reserved.</footer>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="static/Emoji.js"></script>
+    <script>
+        $(document).ready(function() {
+            new EmojiPicker({
+                trigger: [
+                    {
+                        insertInto: ['#contact'],
+                        selector: '.emoji-button1'
+                    },
+                    {
+                        insertInto: ['#message'],
+                        selector: '.emoji-button2'
+                    }
+                ],
+            })
+
+            // Detect language and set directionality dynamically
+            $("#contact, #message").on("input", function() {
+                var text = $(this).val();
+                var lang = detectLanguage(text);
+                setDirectionality($(this), lang);
+            });
+
+            function detectLanguage(text) {
+                // Implement your language detection logic here
+                // You can use external libraries or APIs for more accurate language detection
+                // For simplicity, this example assumes English for text containing only ASCII characters
+                // and Hebrew for text containing any non-ASCII Hebrew characters
+                var regexHebrew = /[\u0590-\u05FF]/;
+                if (regexHebrew.test(text)) {
+                    return "hebrew";
+                } else {
+                    return "english";
+                }
+            }
+
+            function setDirectionality(element, lang) {
+                if (lang === "hebrew") {
+                    element.css("direction", "rtl");
+                    element.css("text-align", "right");
+                } else {
+                    element.css("direction", "ltr");
+                    element.css("text-align", "left");
+                }
+            }       
+        });
+    </script>
+</body>
+</html>
