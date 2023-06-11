@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign Up</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='log.css') }}">
+  </head>
+  <body>
+    <form action="/signup" method="POST">
+      <h1>Sign up:</h1>
+      <div>
+      <input type="text" id="name" name="name" placeholder="Name" required>
+      </div>
+      <div>
+      <input type="email" id="email" name="email" placeholder="Email" required>
+      </div>
+      <div>
+      <input type="password" id="password" name="password" placeholder="Password" required>
+      </div>
+      <input type="hidden" name="targetPage" value="signup">
+      <input type="submit" value="Sign Up">
+      <div id="error-message" style="display: none;"></div>
+      <a href="/login">Login</a>
+      <a href="/">Back to main page</a>
+    </form>
+  <footer>&copy; 2023 Lior Silberman. All rights reserved.</footer>
+  
+
+  <script>
+    // dislpay error message
+    $(document).ready(function() {
+        const message = new URL(window.location.href).searchParams.get("message");
+        if (message) {
+        $("#error-message").text(decodeURIComponent(message)).show();
+        }
+    });
+    </script>
+  </body>
+</html>
