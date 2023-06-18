@@ -1,116 +1,250 @@
+/* style.css */
+
 body {
   font-family: Arial, sans-serif;
-  background-color: #f2f2f2;
-  padding: 20px;
+  margin: 0;
+  padding: 0;
+  background-color: #F0F8FF;
 }
 
 .navbar {
   margin-bottom: 20px;
+  background-color: #333;
 }
 
 .navbar-brand {
   font-size: 24px;
 }
 
+.navbar-nav li a {
+  color: aliceblue !important;
+}
+
+.signup-link {
+  text-decoration: none;
+}
+
 h1 {
   margin-top: 40px;
   font-size: 28px;
+  text-align: center;
+}
+
+img {
+  width: 30%; /* Set the width to 50% of its parent container */
+  height: auto; /* Automatically adjust the height to maintain aspect ratio */
+}
+
+.appeal-section {
+  font-family: baskerville;
+  background-color: #F5F5F5;
+  padding: 40px;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+.appeal-section:hover {
+  transform: translateY(-5px);
+}
+
+.appeal-title {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.appeal-description {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.signup-link {
+  display: inline-block;
+  background-color: #333;
+  color: aliceblue;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-size: 20px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+.signup-link:hover,
+.signup-link:focus {
+  background-color: #4CAF50;
+}
+
+.what-we-do-section h2 {
+  font-family: baskerville;
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
+  transition: transform 0.3s ease;
+}
+
+.what-we-do-section p {
+  font-family: baskerville;
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  color: #555;
+  transition: color 0.3s ease;
+}
+.what-we-do-section p:hover,
+.appeal-section p:hover {
+  color: #4CAF50;
 }
 
 p {
   font-size: 18px;
   color: #555;
-  line-height: 1.5;
 }
 
 form {
   margin-top: 20px;
+  text-align: center;
 }
 
-label {
-  font-weight: bold;
+form label {
   font-size: 18px;
+  color: #333;
 }
 
-input[type="text"],
-textarea {
-  width: 95%;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 4px;
+form input[type="text"],
+form input[type="email"],
+form textarea {
+  width: 300px;
+  height: 40px;
+  padding: 8px;
+  margin-bottom: 20px;
+  border-radius: 5px;
   border: 1px solid #ccc;
+  background-color: #f5f5f5;
+  color: #333;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  transition: background-color 0.3s ease;
+}
+form input[type="text"]:hover,
+form input[type="email"]:hover,
+form textarea:hover {
+  background-color: #e0e0e0;
 }
 
+.form-field input[type="file"] {
+  margin: 0 auto;
+}
 .emoji-container {
   position: relative;
 }
 
-.emoji-button1, .emoji-button2{
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 24px;
+.emoji-button1,
+.emoji-button2 {
+  position: relative;
+  top: 5px;
+  right: 5px;
   cursor: pointer;
 }
 
-button{
-  padding: 10px 20px;
-  font-size: 18px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.form-field {
+  margin-bottom: 20px;
 }
 
-input[type="submit"] {
+form input[type="submit"],
+button {
+  display: inline-block;
+  background-color: #333;
+  color: aliceblue;
   padding: 10px 20px;
-  font-size: 18px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  text-decoration: none;
+  font-size: 20px;
+  border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+form input[type="submit"]:hover,
+form input[type="submit"]:focus,
+button:hover,
+button:focus {
+  background-color: #4CAF50;
+}
+
+.description {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #F5F5F5;
+  border-radius: 5px;
+  transition: box-shadow 0.3s ease;
+}
+.description:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.description p {
+  font-family: baskerville;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.description ol {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-left: 20px;
+}
+
+.description li {
+  font-family: baskerville;
+  margin-bottom: 10px;
 }
 
 footer {
-  margin-top: 40px;
+  background-color: #333;
+  color: aliceblue;
   text-align: center;
+  padding: 10px 0;
   font-size: 14px;
-  color: #666;
 }
 
-/* Additional Styles for Appeal */
-.appeal-section {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 40px;
+/* Additional Colors */
+
+.navbar-toggle .icon-bar {
+  background-color: #f7f7f7;
 }
 
-.appeal-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-.appeal-description {
-  font-size: 18px;
-  color: #555;
-  margin-bottom: 20px;
-}
-
-.signup-link {
-  font-size: 18px;
+footer a {
   color: #fff;
-  background-color: #4CAF50;
-  padding: 10px 20px;
-  border-radius: 4px;
-  text-decoration: none;
 }
 
-.signup-link:hover {
-  background-color: #45a049;
+footer a:hover,
+footer a:focus {
+  color: #4CAF50;
+}
+
+.dropdown {
+  position:absolute;
+  /* display: flexbox; */
+}
+
+.dropdown-btn {
+  background-color: #333;
+  color: aliceblue;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  font-size: 18px;
+  font-family: baskerville;
+  display: none;
+  position: absolute;
+  background-color: #f5f5f5;
+  min-width: 500px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  padding: 20px;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
 }
