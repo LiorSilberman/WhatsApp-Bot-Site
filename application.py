@@ -102,7 +102,7 @@ def logout():
 @application.route('/open-whatsapp', methods=['POST','GET'])
 def open_whatsapp():
     if request.method == 'GET':
-        render_template('index.html')
+        return render_template('index.html')
     
     global driver
     chromedriver_autoinstaller.install()
@@ -127,16 +127,19 @@ def open_whatsapp():
 @application.route('/send-message', methods=['POST', 'GET'])
 def send_message():
     if request.method == 'GET':
-        return redirect('/')
+        return render_template('index.html')
     
     try:
-        wait = WebDriverWait(driver, 60)  # Adjust the timeout as needed
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#side .copyable-text')))
+        # wait = WebDriverWait(driver, 60)  # Adjust the timeout as needed
+        # wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#side .copyable-text')))
+        print("lior")
         # Get form data
         contact_name = request.form['contact']
         message = request.form['message']
         image_file = request.files['image']
         image_path = ''
+        print(contact_name)
+        print(message)
         if image_file and allowed_file(image_file.filename):
             max_size = 16 * 1024 * 1024
             filename = secure_filename(image_file.filename)
@@ -244,8 +247,7 @@ def send_message():
 
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in application.config['ALLOWED_EXTENSIONS']
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in application.config['ALLOWED_EXTENSIONS']
 
 
 # Home page

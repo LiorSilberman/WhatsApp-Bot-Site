@@ -82,23 +82,7 @@
             </ol>
         </div>
       </div>
-
-    <div class="description">
-        <p>Instructions:</p>
-        <ol>
-            <li>Click on the "Open WhatsApp" button to connect your WhatsApp account. You have 1 minute to complete the connection before the WhatsApp connection closes. If the connection closes, you will need to try again.</li>
-            <li>In the "Contact Names" textarea, add your list of contacts exactly as they are written in your WhatsApp contact list. Each name should be entered on a new line. For example:
-                <code><br>
-                Jane Boe<br>
-                Jane Smith<br>
-                Alice Johnson</code><br>
-                Make sure to follow this format to ensure the names are recognized correctly.
-            </li>
-            <li>Enter your desired message in the "Message" textarea. This is the message that you want to send to the contacts in your list. You can also add emojis to your message by clicking on the smiley emoji icon.</li>
-            <li>Once you have added the contact names and message, click on the "Send Message" button to initiate the message sending process. Sit back and watch the magic happen as your message gets sent to the specified contacts.</li>
-        </ol>
-    </div>
-
+    {% endif %}
 
     <div class="form-container">
         <form action="/open-whatsapp" method="POST">
@@ -109,7 +93,7 @@
             
         </form>
         
-        <form action="/send-message" method="POST">
+        <form action="/send-message" method="POST" enctype="multipart/form-data">
             <!-- Send message form fields -->
             <div class="form-field">
                 <label for="contact">Contact Names:</label>
@@ -119,7 +103,6 @@
                     {% else %}
                     <textarea id="contact" name="contact" placeholder="name1 &#10;name2&#10;name3&#10;..." style="width: 350px; height: 100px;"  required disabled></textarea>
                     {% endif %}
-                    <textarea id="contact" name="contact" placeholder="name1 &#10;name2&#10;name3&#10;..." style="width: 350px; height: 100px;"  required></textarea>
                     <label class="emoji-button1">🙂</label>
                 </div>
             </div>
