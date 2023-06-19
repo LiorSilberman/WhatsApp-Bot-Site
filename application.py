@@ -84,7 +84,9 @@ def login():
             if bcrypt.checkpw(password.encode('utf-8'), user['password']):
                 # Store user session
                 session['username'] = user['username']
-                return redirect('/')
+                run = False
+                error = ""
+                return render_template('index.html', run=run, error=error)
         
         return render_template('login.html', error='Invalid credentials')
 
@@ -111,6 +113,7 @@ def open_whatsapp():
         driver.get("https://web.whatsapp.com/")
         sleep(3)
         screenshot = driver.get_screenshot_as_png()
+        
         # driver.maximize_window()
         # Wait for the QR code to be scanned
         screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
@@ -130,8 +133,8 @@ def send_message():
         return render_template('index.html')
     
     try:
-        # wait = WebDriverWait(driver, 60)  # Adjust the timeout as needed
-        # wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#side .copyable-text')))
+        wait = WebDriverWait(driver, 60)  # Adjust the timeout as needed
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#side .copyable-text')))
         print("lior")
         # Get form data
         contact_name = request.form['contact']
@@ -166,6 +169,9 @@ def send_message():
         not_found_names = []
         for name in names:
             name = name.rstrip('\r')
+            if len(name) == 0 or name == '\r' or name == '':
+                names.remove(name)
+                continue
             find_user = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]')))
             find_user.click()
             act.key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
@@ -202,7 +208,6 @@ def send_message():
             if image_file == '':
 
                 # copy paste the message to send
-                
                 act = ActionChains(driver)
                 act.key_down(Keys.CONTROL).send_keys("v").key_up(Keys.CONTROL).perform()
 
@@ -235,11 +240,12 @@ def send_message():
             os.remove(image_path)
 
 
-        return render_template('index.html', run=True, error='')    
+        driver.quit()
+        return render_template('index.html', run=False, error='', sent=names)    
 
     except WebDriverException:
         driver.quit()
-        return render_template('index.html', max_size=True, message="Scan QR code before sending the message.")
+        return render_template('index.html', max_size=False, message="Scan QR code before sending the message.")
 
     except Exception as e:
             print("Error:", e)

@@ -82,12 +82,13 @@
             </ol>
         </div>
       </div>
-    {% endif %}
+    
 
     <div class="form-container">
         <form action="/open-whatsapp" method="POST">
+            {% if not run %}
             <button id="open-whatsapp-btn">Open WhatsApp</button>
-            {% if run %}
+            {% else %}
             <img src="data:image/png;base64,{{ screenshot_base64 }}" alt="Screenshot">
             {% endif %}
             
@@ -121,7 +122,7 @@
                 <label for="image">Image:</label>
                 <input type="file" id="image" name="image" accept="image/*,video/*"><br>
             </div>
-            {% if not run and not max_size %}
+            {% if max_size %}
             <p>{{ filename }} is over 16 MB limit.</p>
             <p>We recommend compressing the file using <a href="https://videocandy.com/compress-video.html">VideoCandy</a>.</p>
             {% endif %}
@@ -136,12 +137,18 @@
             <input type="submit" value="Send Message" disabled>
             {% endif %}
             
-    
+            <div class="scrollable">
+            {% for name in sent %}
+                <p>{{name}} recieved the message sucssesfully.</p>
+            {% endfor %}
+            </div>
+
             {% for name in error %}
             <p>{{name}} not found in your contacts.</p>
-            {% endfor %}
+            {% endfor %}   
         </form>
     </div>
+    {% endif %}
     
 
     <!-- Contact Us -->
