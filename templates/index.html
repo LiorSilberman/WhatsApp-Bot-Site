@@ -137,11 +137,17 @@
             <input type="submit" value="Send Message" disabled>
             {% endif %}
             
+
+            {% if sent %}
             <div class="scrollable">
-            {% for name in sent %}
-                <p>{{name}} recieved the message sucssesfully.</p>
-            {% endfor %}
+                <h3>Recipients:</h3>
+                <ul>
+                    {% for name in sent %}
+                    <li>{{ name }} received the message successfully.</li>
+                    {% endfor %}
+                </ul>
             </div>
+            {% endif %}
 
             {% for name in error %}
             <p>{{name}} not found in your contacts.</p>
