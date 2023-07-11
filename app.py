@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, send_file
+from flask import Flask, render_template, request, redirect, session, send_file, flash
 from pymongo import MongoClient
 import bcrypt
 from functools import wraps
@@ -17,19 +17,33 @@ import os
 from io import BytesIO
 import base64
 from werkzeug.utils import secure_filename
+from flask_mail import Mail, Message
+import secrets
+from datetime import datetime, timedelta
+import pandas as pd
+import openpyxl
 
 
 
 
-application = Flask(__name__)
-application.secret_key = "Lior_secret_12344321"
+
+app = Flask(__name__)
+app.secret_key = "Lior_secret_12344321"
 
 client = MongoClient('mongodb://127.0.0.1:27017')  # Replace with your MongoDB connection string
 db = client['myDB']  # Replace with your database name
 collection = db['users']  # Replace with your collection name
 
-application.config['UPLOAD_FOLDER'] = '/home/lior/computer_science/whatsapp_bot/WhatsApp-Bot-Site/temp'
-application.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'webm', 'mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', 'mpeg'}
+app.config['UPLOAD_FOLDER'] = '/home/lior/computer_science/whatsapp_bot/WhatsApp-Bot-Site/temp'
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'webm', 'mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', 'mpeg'}
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'delicious.final.project@gmail.com'
+app.config['MAIL_PASSWORD'] = 'hmbgzxxozniqyzbr'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
+
 
 
 # Authentication decorator
@@ -42,7 +56,88 @@ def login_required(f):
     return decorated_function
 
 
-@application.route('/signup', methods=['GET', 'POST'])
+# Function to send the password reset email
+def send_password_reset_email(email, token):
+    msg = Message('Password Reset',sender='delicious.final.project@gmail.com' , recipients=[email])
+    msg.body = f"Click the following link to reset your password: {request.host_url}reset-password/{token}"
+    mail.send(msg)
+
+def generate_password_reset_token():
+    token = secrets.token_hex(16)  # Generate a random hex token with 16 characters
+    return token
+
+def get_token_expiration_time():
+    # Set the token expiration time to 1 hour from the current time
+    expiration_time = datetime.now() + timedelta(hours=1)
+    return expiration_time
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if request.method == 'POST':
+        # Retrieve the new password from the form
+        new_password = request.form['password']
+
+        # Find the user in the collection using the token
+        user = collection.find_one({'reset_token': token})
+
+        if user:
+            # Check if the token has not expired
+            expiration_time = user.get('expiration_time')
+            if expiration_time and datetime.now() <= expiration_time:
+                # Hash the new password
+                hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+
+                # Update the user's password and remove the reset_token and expiration_time fields
+                collection.update_one({'reset_token': token},
+                                      {'$set': {'password': hashed_password},
+                                       '$unset': {'reset_token': '', 'expiration_time': ''}})
+
+                # flash('Password reset successfully. Please login with your new password.')
+                return redirect('/login')
+            else:
+                # flash('Password reset token has expired. Please request a new password reset.')
+                return redirect('/forgot-password')
+        else:
+            # flash('Invalid password reset token. Please request a new password reset.')
+            return redirect('/forgot-password')
+
+    return render_template('reset_password.html', token=token)
+
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+
+    if request.method == 'POST':
+        email = request.form['email']
+
+        # Verify if the email exists in your database
+        user = collection.find_one({'email': email})
+        if user:
+            # Generate a password reset token
+            token = generate_password_reset_token()
+
+            # Set the expiration time for the token
+            expiration_time = get_token_expiration_time()
+
+            # Store the token and expiration time in the user's document
+            collection.update_one({'email': email},
+                                  {'$set': {'reset_token': token, 'expiration_time': expiration_time}})
+
+            # Send password reset email
+            send_password_reset_email(email, token)
+
+            flash('An email with password reset instructions has been sent to your email address.')
+            sleep(6)
+            return render_template('login.html', error="An email with password reset instructions has been sent to your email address.")
+    if request.method == 'GET':
+        return render_template('forgot_password.html', error="")
+
+    return render_template('forgot_password.html', error="Email not found")
+
+   
+
+
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
         # Retrieve the form data
@@ -69,7 +164,7 @@ def signup():
 
 
 
-@application.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         # Retrieve the form data
@@ -86,14 +181,14 @@ def login():
                 session['username'] = user['username']
                 run = False
                 error = ""
-                return render_template('index.html', run=run, error=error)
+                return render_template('index.html', run=run, error=error, max_size=True, scan=False)
         
         return render_template('login.html', error='Invalid credentials')
 
     return render_template('login.html')
 
 
-@application.route('/logout')
+@app.route('/logout')
 def logout():
     session.clear()
     return redirect('/')
@@ -101,41 +196,68 @@ def logout():
 
 
 # Open WhatsApp
-@application.route('/open-whatsapp', methods=['POST','GET'])
+@app.route('/open-whatsapp', methods=['POST','GET'])
 def open_whatsapp():
     if request.method == 'GET':
-        return render_template('index.html')
+        flash("hey how are you?")
+        return render_template('index.html', max_size=True)
     
     global driver
     chromedriver_autoinstaller.install()
     try:
         driver = webdriver.Chrome()
         driver.get("https://web.whatsapp.com/")
-        sleep(3)
-        screenshot = driver.get_screenshot_as_png()
+        # Wait until the QR code is visible
+        wait = WebDriverWait(driver, 30)  # Maximum wait time of 30 seconds
+        qr_code_element = wait.until(EC.visibility_of_element_located((By.XPATH, "//canvas[@aria-label='Scan me!']")))
+
         
+        screenshot = driver.get_screenshot_as_png()
+
         # driver.maximize_window()
         # Wait for the QR code to be scanned
         screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
 
-        return render_template('index.html', run=True,  screenshot_base64=screenshot_base64)
-        
-
+        return render_template('index.html',scan=False, run=True, max_size=True, screenshot_base64=screenshot_base64)
         
     except WebDriverException:
         driver.quit()
         return render_template('index.html')
 
-# Send message
-@application.route('/send-message', methods=['POST', 'GET'])
-def send_message():
+
+# scaned QR code?
+@app.route('/scan-qr', methods=['POST','GET'])
+def scan_qr():
     if request.method == 'GET':
-        return render_template('index.html')
+        return render_template('index.html', max_size=True)
     
     try:
-        wait = WebDriverWait(driver, 60)  # Adjust the timeout as needed
+        wait = WebDriverWait(driver, 60)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#side .copyable-text')))
-        print("lior")
+        profile_picture = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[4]/header/div[1]/div')))
+        profile_picture.click()
+        owner_name_container = wait.until(EC.visibility_of_element_located((By.XPATH,'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div/div[2]/div[2]/div/div/span/span')))
+
+        # Extract the text of the owner's name
+        global owner_name
+        owner_name = owner_name_container.text
+        
+        back_button = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div')))
+        back_button.click()
+        
+        return render_template('index.html', run=True, max_size=True, scan=True, name=owner_name, screenshot_base64="")
+    except WebDriverException:
+        driver.quit()
+        return render_template('index.html', max_size=True, message="Oops! Something went wrong with Open WhatsApp. Please try again.")
+    
+
+# Send message
+@app.route('/send-message', methods=['POST', 'GET'])
+def send_message():
+    if request.method == 'GET':
+        return render_template('index.html', max_size=True)
+    
+    try:
         # Get form data
         contact_name = request.form['contact']
         message = request.form['message']
@@ -146,7 +268,7 @@ def send_message():
         if image_file and allowed_file(image_file.filename):
             max_size = 16 * 1024 * 1024
             filename = secure_filename(image_file.filename)
-            image_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             image_file.save(image_path)
             if (os.path.getsize(image_path) > max_size):
                 driver.quit()
@@ -188,7 +310,7 @@ def send_message():
         # contact names not exist in client phone
         if len(not_found_names) != 0:
             driver.quit()
-            return render_template('index.html', run=False, error=not_found_names)
+            return render_template('index.html', run=False, max_size=True, error=not_found_names)
         
         message = pyperclip.copy(str(message))
         # all contacts valid, start sending
@@ -203,7 +325,7 @@ def send_message():
             find_chat.click()
             sleep(2)
 
-           
+            wait_for_v = WebDriverWait(driver, 10)  # Maximum wait time in seconds
             # send only message
             if image_file == '':
 
@@ -213,7 +335,7 @@ def send_message():
 
                 # send the message
                 act.key_down(Keys.ENTER).perform()
-                sleep(3)
+                sleep(4)
                 
 
             else:
@@ -230,7 +352,7 @@ def send_message():
 
                 # send the message + image
                 act.key_down(Keys.ENTER).perform()
-                sleep(4)
+                sleep(5)
 
             
         
@@ -241,29 +363,57 @@ def send_message():
 
 
         driver.quit()
-        return render_template('index.html', run=False, error='', sent=names)    
+        return render_template('index.html', run=False, max_size=True, error='', sent=names)    
 
     except WebDriverException:
         driver.quit()
-        return render_template('index.html', max_size=False, message="Scan QR code before sending the message.")
+        return render_template('index.html', max_size=True, message="Oops! Something went wrong with Open WhatsApp. Please try again.")
 
     except Exception as e:
             print("Error:", e)
-            
+
+
+@app.route('/contact-us', methods=['POST', 'GET'])
+def contact_us():
+    if request.method == 'POST':
+        user_email = request.form['email']
+        user_message = request.form['message']
+
+        excel_file_path = "/home/lior/computer_science/whatsapp_bot/WhatsApp-Bot-Site/contact_us.xlsx"
+        # Create a DataFrame to hold the data
+        data = {'Email': [user_email], 'Message': [user_message]}
+        df = pd.DataFrame(data)
+
+        # Check if the Excel file already exists
+        try:
+            # Load the existing file
+            existing_data = pd.read_excel(excel_file_path)
+            # Append the new data to the existing data
+            updated_data = pd.concat([existing_data, df], ignore_index=True)
+        except FileNotFoundError:
+            # If the file doesn't exist, create a new DataFrame with the data
+            updated_data = df
+
+        # Write the DataFrame to the Excel file
+        updated_data.to_excel(excel_file_path, index=False)
+
+        return render_template("index.html", contact_us=True, max_size=True)
+    
+    return redirect('/')
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in application.config['ALLOWED_EXTENSIONS']
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 
 # Home page
-@application.route('/')
+@app.route('/')
 def home():
     run = False
     error = ""
-    return render_template('index.html', run=run, error=error, max_size=True)
+    return render_template('index.html', run=run, error=error, max_size=True, scan=False)
 
     
 
 if __name__ == '__main__':
-    application.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', debug=False)

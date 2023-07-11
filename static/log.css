@@ -1,6 +1,6 @@
 body {
     display: flex; justify-content: center; align-items: center; height: 100vh;
-    background-image: url('food-back2.jpg');
+    /* background-image: url('food-back2.jpg'); */
     background-repeat: no-repeat;
     background-size: cover;
 }
