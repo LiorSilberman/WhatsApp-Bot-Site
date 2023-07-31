@@ -24,10 +24,8 @@ import pandas as pd
 import openpyxl
 
 
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 
-
-
-app = Flask(__name__)
 app.secret_key = "Lior_secret_12344321"
 
 client = MongoClient('mongodb://127.0.0.1:27017')  # Replace with your MongoDB connection string
@@ -126,8 +124,6 @@ def forgot_password():
             # Send password reset email
             send_password_reset_email(email, token)
 
-            flash('An email with password reset instructions has been sent to your email address.')
-            sleep(6)
             return render_template('login.html', error="An email with password reset instructions has been sent to your email address.")
     if request.method == 'GET':
         return render_template('forgot_password.html', error="")
@@ -191,8 +187,13 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect('/')
-
+    try:
+        driver.quit()
+        return redirect('/')
+    except WebDriverException:
+        return redirect('/')
+    except Exception as e:
+        return redirect('/')
 
 
 # Open WhatsApp
@@ -207,14 +208,13 @@ def open_whatsapp():
     try:
         driver = webdriver.Chrome()
         driver.get("https://web.whatsapp.com/")
+
         # Wait until the QR code is visible
         wait = WebDriverWait(driver, 30)  # Maximum wait time of 30 seconds
         qr_code_element = wait.until(EC.visibility_of_element_located((By.XPATH, "//canvas[@aria-label='Scan me!']")))
-
         
         screenshot = driver.get_screenshot_as_png()
 
-        # driver.maximize_window()
         # Wait for the QR code to be scanned
         screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
 
@@ -272,13 +272,10 @@ def send_message():
             image_file.save(image_path)
             if (os.path.getsize(image_path) > max_size):
                 driver.quit()
-                return render_template('index.html', run=False, max_size=False, filename=filename)
+                return render_template('index.html', run=False, max_size=False, message="Invalid file format, please try again", filename=filename)
             
             sleep(2)
-           
-            print("Image saved:", image_path)
         else:
-            print("Invalid file format")
             image_file = ''
 
         
@@ -299,8 +296,6 @@ def send_message():
             act.key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
             find_user.send_keys(name)
             
-            # sleep(2)
-            
             find_chat = None
             try:
                 find_chat = wait.until(EC.visibility_of_element_located((By.XPATH, '//span[@title = "{}"]'.format(name))))
@@ -310,7 +305,7 @@ def send_message():
         # contact names not exist in client phone
         if len(not_found_names) != 0:
             driver.quit()
-            return render_template('index.html', run=False, max_size=True, error=not_found_names)
+            return render_template('index.html', run=False, max_size=True, message="Contacts not found error, please try again", error=not_found_names)
         
         message = pyperclip.copy(str(message))
         # all contacts valid, start sending
@@ -339,7 +334,8 @@ def send_message():
                 
 
             else:
-                attachment_box = driver.find_element(By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/div')
+                
+                attachment_box = driver.find_element(By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/div/div/span')
                 attachment_box.click()
 
                 image_box = driver.find_element(By.XPATH, '//input[@accept="image/*,video/mp4,video/3gpp,video/quicktime"]')
@@ -363,7 +359,7 @@ def send_message():
 
 
         driver.quit()
-        return render_template('index.html', run=False, max_size=True, error='', sent=names)    
+        return render_template('index.html', run=False, max_size=True, error='', message="Message sent successfully", sent=names)    
 
     except WebDriverException:
         driver.quit()
@@ -380,8 +376,10 @@ def contact_us():
         user_message = request.form['message']
 
         excel_file_path = "/home/lior/computer_science/whatsapp_bot/WhatsApp-Bot-Site/contact_us.xlsx"
+        current_datetime = datetime.now()
+        formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
         # Create a DataFrame to hold the data
-        data = {'Email': [user_email], 'Message': [user_message]}
+        data = {'Email': [user_email], 'Message': [user_message], 'Date': [formatted_datetime]}
         df = pd.DataFrame(data)
 
         # Check if the Excel file already exists
@@ -397,8 +395,12 @@ def contact_us():
         # Write the DataFrame to the Excel file
         updated_data.to_excel(excel_file_path, index=False)
 
-        return render_template("index.html", contact_us=True, max_size=True)
-    
+        try:
+            driver.current_url
+        except Exception as e:
+            return render_template("index.html", contact_us=True, message="We have received your message and will promptly get back to you. Thank you for contacting us!", max_size=True)
+        
+        return render_template("index.html", contact_us=True, run=True, scan=True, name=owner_name, screenshot_base64="", message="We have received your message and will promptly get back to you. Thank you for contacting us!", max_size=True)
     return redirect('/')
 
 

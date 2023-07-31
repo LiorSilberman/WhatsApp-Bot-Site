@@ -9,8 +9,8 @@
 
 </head>
 <body>
-    <nav class="navbar navbar-default">
-        <div class="container-fluid" style="background-color:#333">
+    <nav class="navbar">
+        <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-navbar-collapse-1">
                     <span class="sr-only">Toggle navigation</span>
@@ -18,7 +18,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" style="color: aliceblue" href="#">WhatsApp Bot</a>
+                <a class="navbar-brand" style="font-family: monospace; color: aliceblue" href="#">WhatsAppBot</a>
             </div>
             <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
                 {% if not session['username'] %}
@@ -28,7 +28,7 @@
                 </ul>
                 {% else %}
                 <ul class="nav navbar-nav navbar-right">
-                    <li id="logout"><a style="color: aliceblue" href="/logout">Log Out</a></li>
+                    <li id="logout"><a style="color: aliceblue" href="/logout">Logout</a></li>
                 </ul>
                 {% endif %}
             </div>
@@ -49,12 +49,10 @@
             <a class="signup-link" href="/signup">Sign Up Now</a>
         </div>
         <div class="appeal-section">
-            <div class="what-we-do-section">
-                <h2>What We Do</h2>
-                <p>At our company, we are committed to revolutionizing business communication through our cutting-edge WhatsApp Bot. Our mission is to provide you with an affordable solution that doesn't compromise on functionality.</p>
-                <p>With our feature-rich platform, you can effortlessly send WhatsApp messages to your audience and amplify your reach. Stand out from the competition by including attention-grabbing images that enhance your communication and leave a lasting impression.</p>
-                <p>Say goodbye to exorbitant pricing and limited features. Join our business community and enjoy the benefits of our cost-effective solution that empowers you to connect with your customers in a meaningful way. Sign up now and unlock the full potential of WhatsApp messaging!</p>
-            </div>
+            <h2 class="appeal-title">What We Do</h2>
+            <p class="appeal-description">At our company, we are committed to revolutionizing business communication through our cutting-edge WhatsApp Bot. Our mission is to provide you with an affordable solution that doesn't compromise on functionality.</p>
+            <p class="appeal-description">With our feature-rich platform, you can effortlessly send WhatsApp messages to your audience and amplify your reach. Stand out from the competition by including attention-grabbing images that enhance your communication and leave a lasting impression.</p>
+            <p class="appeal-description">Say goodbye to exorbitant pricing and limited features. Join our business community and enjoy the benefits of our cost-effective solution that empowers you to connect with your customers in a meaningful way. Sign up now and unlock the full potential of WhatsApp messaging!</p>
         </div>
     </div>
     {% endif %}
@@ -63,14 +61,43 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">WhatsApp Bot</h3>
+                <div class="panel1 panel1-default">
+                    <div class="panel1-heading">
+                        <h3 class="panel1-title">WhatsApp Bot</h3>
                     </div>
-                    <div class="panel-body">
+                    <div class="panel1-body">
                         <form action="/open-whatsapp" method="POST">
                             {% if message != "" %}
                             <div class="alert alert-info">{{ message }}</div>
+                            {% endif %}
+                            
+                            {% if not max_size %}
+                            <div class="alert alert-warning">
+                                {{ filename }} exceeds the 16 MB size limit. We recommend compressing the file using <a href="https://videocandy.com/compress-video.html">VideoCandy</a>.
+                            </div>
+                            {% endif %}
+
+                            {% if sent %}
+                            <div class="scrollable">
+                                <h4>Recipients:</h4>
+                                <ul class="list-group">
+                                    {% for name in sent %}
+                                    <li class="list-group-item">{{ name }} </li>
+                                    {% endfor %}
+                                </ul><br>
+                            </div>
+                            {% endif %}
+                            
+                            {% if error %}
+                            <div class="scrollable">
+                                <div class="alert alert-danger">
+                                    <ul class="list-group">
+                                    {% for name in error %}
+                                        <li style="color:red">{{ name }} not found in your contacts.</li>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
                             {% endif %}
 
                             {% if not run %}
@@ -84,11 +111,11 @@
             </div>
             {% if run and scan == False %}
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Scan QR Code</h3>
+                <div class="panel1 panel1-default">
+                    <div class="panel1-heading">
+                        <h3 class="panel1-title">Scan QR Code</h3>
                     </div>
-                    <div class="panel-body">
+                    <div class="panel1-body">
                         <form id="myForm" action="/scan-qr" method="POST">
                             <h4>Did you scan the QR code?</h4>
                             <label class="rocker rocker-small">
@@ -103,11 +130,11 @@
             </div>
             {% elif scan == True %}
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Connected to WhatsApp</h3>
+                <div class="panel1 panel1-default">
+                    <div class="panel1-heading">
+                        <h3 class="panel1-title">Connected to WhatsApp</h3>
                     </div>
-                    <div class="panel-body">
+                    <div class="panel1-body">
                         <h4>{{ name }} is connected to WhatsApp 👍</h4>
                     </div>
                 </div>
@@ -116,11 +143,11 @@
         </div>
         <div class="row">
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Send Message</h3>
+                <div class="panel1 panel1-default">
+                    <div class="panel1-heading">
+                        <h3 class="panel1-title">Send Message</h3>
                     </div>
-                    <div class="panel-body">
+                    <div class="panel1-body">
                         <form action="/send-message" method="POST" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="contact">Contact Names:</label>
@@ -149,11 +176,7 @@
                                 {% endif %}
                                 <div class="form-text">Supported file types: images and videos</div>
                             </div>
-                            {% if not max_size %}
-                            <div class="alert alert-warning">
-                                {{ filename }} exceeds the 16 MB size limit. We recommend compressing the file using <a href="https://videocandy.com/compress-video.html">VideoCandy</a>.
-                            </div>
-                            {% endif %}
+                            
                             <div class="loader">
                                 <div class="dot-spinner">
                                     <div class="dot-spinner__dot"></div>
@@ -171,31 +194,18 @@
                             {% else %}
                             <input type="submit" class="btn btn-primary" value="Send Message" disabled>
                             {% endif %}
-                            {% if sent %}
-                            <div class="scrollable">
-                                <h4>Recipients:</h4>
-                                <ul class="list-group">
-                                    {% for name in sent %}
-                                    <li class="list-group-item">{{ name }} received the message successfully.</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            {% endif %}
-                            {% for name in error %}
-                            <div class="alert alert-danger">
-                                {{ name }} not found in your contacts.
-                            </div>
-                            {% endfor %}   
+                            
+                               
                         </form>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Instructions</h3>
+                <div class="panel1 panel1-default">
+                    <div class="panel1-heading">
+                        <h3 class="panel1-title">Instructions</h3>
                     </div>
-                    <div class="panel-body">
+                    <div class="panel1-body">
                         <ol>
                             <li>Click on the "Open WhatsApp" button to connect your WhatsApp account. You have 1 minute to complete the connection before the WhatsApp connection closes. If the connection closes, you will need to try again.</li>
                             <li>In the "Contact Names" textarea, add your list of contacts exactly as they are written in your WhatsApp contact list. Each name should be entered on a new line.</li>
@@ -209,7 +219,6 @@
         </div>
     </div>
     {% endif %}
-    
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -217,9 +226,9 @@
                     <div class="contact-us-section">
                         <form class="form" action="/contact-us" method="POST">
                             <div class="title">Contact Us</div>
-                            <p>Discover more about us! Share your details, and we'll reach out to you with all the exciting information.</p>
+                            <p class="appeal-description">Discover more about us! Share your details, and we'll reach out to you with all the exciting information.</p>
                             <div class="form-group">
-                                <input type="email" class="form-control" name="email" placeholder="Your email" required>
+                                <input type="email" class="form-control" name="email" placeholder="Your email" autocomplete="on" required>
                             </div>
                             <div class="form-group">
                                 <textarea class="form-control" name="message" id="contact_us_message" placeholder="Your message" required></textarea>
@@ -238,72 +247,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="static/Emoji.js"></script>
-    <script>
-        $(document).ready(function() {
-
-            new EmojiPicker({
-                trigger: [
-                    {
-                        insertInto: ['#contact'],
-                        selector: '.emoji-button1'
-                    },
-                    {
-                        insertInto: ['#message'],
-                        selector: '.emoji-button2'
-                    }
-                ],
-            })
-
-            // Detect language and set directionality dynamically
-            $("#contact, #message, #contact_us_message").on("input", function() {
-                var text = $(this).val();
-                var lang = detectLanguage(text);
-                setDirectionality($(this), lang);
-            });
-
-            function detectLanguage(text) {
-                // Implement your language detection logic here
-                // You can use external libraries or APIs for more accurate language detection
-                // For simplicity, this example assumes English for text containing only ASCII characters
-                // and Hebrew for text containing any non-ASCII Hebrew characters
-                var regexHebrew = /[\u0590-\u05FF]/;
-                if (regexHebrew.test(text)) {
-                    return "hebrew";
-                } else {
-                    return "english";
-                }
-            }
-
-            function setDirectionality(element, lang) {
-                if (lang === "hebrew") {
-                    element.css("direction", "rtl");
-                    element.css("text-align", "right");
-                } else {
-                    element.css("direction", "ltr");
-                    element.css("text-align", "left");
-                }
-            }
-            
-            var label = document.getElementById("myLabel");
-
-            // Function to hide the label after 5 seconds
-            function hideLabel() {
-                label.style.display = "none";
-            }
-            setTimeout(hideLabel, 5000);
-
-            // Bind the form submission event
-            $("form").on("submit", function() {
-                // Show the dot-spinner
-                $(".loader").css("display", "flex");
-            });
-
-            $('#checkbox').change(function() {
-                if (this.checked) {
-                    $('#submitButton').click();
-                }
-            });
-        });
-    </script>
+    <script src="static/scripts.js"></script>
 </body>
 </html>

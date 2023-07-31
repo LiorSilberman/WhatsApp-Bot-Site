@@ -6,6 +6,7 @@
     <title>Sign Up</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='log.css') }}">
+    <script src="static/log.js"></script>
   </head>
   <body>
     <form action="/signup" method="POST">
@@ -26,16 +27,5 @@
       <a href="/">Back to main page</a>
     </form>
   <footer>&copy; 2023 Lior Silberman. All rights reserved.</footer>
-  
-
-  <script>
-    // dislpay error message
-    $(document).ready(function() {
-        const message = new URL(window.location.href).searchParams.get("message");
-        if (message) {
-        $("#error-message").text(decodeURIComponent(message)).show();
-        }
-    });
-    </script>
   </body>
 </html>
