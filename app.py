@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, send_file, flash
-from pymongo import MongoClient
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 import bcrypt
 from functools import wraps
 from selenium import webdriver
@@ -27,8 +28,9 @@ import openpyxl
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 app.secret_key = "Lior_secret_12344321"
-
-client = MongoClient('mongodb://127.0.0.1:27017')  # Replace with your MongoDB connection string
+uri = 'mongodb+srv://liorsil:Liorsil@cluster0.28u4gep.mongodb.net/?retryWrites=true&w=majority'
+client = MongoClient(uri, server_api=ServerApi('1'))
+# client = MongoClient('mongodb://127.0.0.1:27017')  # Replace with your MongoDB connection string
 db = client['myDB']  # Replace with your database name
 collection = db['users']  # Replace with your collection name
 
@@ -42,7 +44,11 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
-
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
 
 # Authentication decorator
 def login_required(f):
@@ -200,7 +206,6 @@ def logout():
 @app.route('/open-whatsapp', methods=['POST','GET'])
 def open_whatsapp():
     if request.method == 'GET':
-        flash("hey how are you?")
         return render_template('index.html', max_size=True)
     
     global driver
@@ -234,15 +239,16 @@ def scan_qr():
     try:
         wait = WebDriverWait(driver, 60)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#side .copyable-text')))
-        profile_picture = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[4]/header/div[1]/div')))
+        sleep(3)
+        profile_picture = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[4]/header/div[1]/div/img')))
         profile_picture.click()
         owner_name_container = wait.until(EC.visibility_of_element_located((By.XPATH,'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div/div[2]/div[2]/div/div/span/span')))
-
+    
         # Extract the text of the owner's name
         global owner_name
         owner_name = owner_name_container.text
         
-        back_button = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div')))
+        back_button = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div/span')))
         back_button.click()
         
         return render_template('index.html', run=True, max_size=True, scan=True, name=owner_name, screenshot_base64="")
@@ -306,8 +312,9 @@ def send_message():
         if len(not_found_names) != 0:
             driver.quit()
             return render_template('index.html', run=False, max_size=True, message="Contacts not found error, please try again", error=not_found_names)
-        
+        print('lior 1')
         message = pyperclip.copy(str(message))
+        print('lior 2')
         # all contacts valid, start sending
         for name in names:
             name = name.rstrip('\r')
@@ -316,7 +323,9 @@ def send_message():
             act.key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
             find_user.send_keys(name)
             # sleep(2)
+            print('lior 3')
             find_chat = wait.until(EC.visibility_of_element_located((By.XPATH, '//span[@title = "{}"]'.format(name))))
+            print('lior 4')
             find_chat.click()
             sleep(2)
 
